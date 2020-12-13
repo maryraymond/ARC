@@ -27,13 +27,13 @@ import re
 #   and object
 # - np.fliplr: this function is very useful when the image required to be flipped
 # - get_neighbour_pixels: this function uses recursion to find all the adjacent pixels that forms an object,
-#   staring from a given top left pixel (note: get_neighbour_pixels has a limitation   that is described
-#   in the function documentation)
+#   staring from a given top left pixel, it is called from get_object_list to track each pixel and return the
+#   complete object of which this pixel is part of
 # Third thoughts about solving the ARC using AI
-#   Using the manual method to solve a number of problems it seems that one important step in solving the task
-#   would be to identify all the objects in the grid/image and starting from there based on the objects color,
-#   location and / or shape drive the required transformation, so this would mean that whatever AI algorithm that
-#   attempt to solve the ARC needs to know how to extract those objects and their information
+#   As observed by using the manual methods to solve a number of problems it seems clear that one important step in
+#   solving the task would be to identify all the objects in the grid/image and starting from there based on the
+#   objects color, location and / or shape drive the required transformation, so this would mean that whatever
+#   AI algorithm that attempt to solve the ARC needs to know how to extract those objects and their information
 
 ### YOUR CODE HERE: write at least three functions which solve
 ### specific tasks by transforming the input x and returning the
@@ -84,7 +84,8 @@ def solve_846bdb03(x):
     # offset the left and right bars to their location in the output image
     offset_objects([left_bar, right_bar], i_offset, j_offset)
     output = np.zeros((output_height, output_width))
-    draw_objects(output, [left_bar, right_bar])
+    # Call the draw function for the 2 bars
+    [draw_objects(output, obj) for obj in [left_bar, right_bar]]
 
     # now we will check the middle object
     i_max, i_min, j_max, j_min = get_boundary(colored_pixels)
@@ -101,7 +102,7 @@ def solve_846bdb03(x):
     # to its new location in the output image, this step is required before we
     # draw the object directly to the output image because we might need to flip
     # the object to match the left and right colors
-    draw_objects(output_overlay, [colored_pixels])
+    draw_objects(output_overlay, colored_pixels)
 
     # Check if we got the correct color in the left side
     if left_pixels_color[0] != left_color:
@@ -109,40 +110,6 @@ def solve_846bdb03(x):
         output_overlay = np.fliplr(output_overlay)
     # overlay the 2 parts of the output
     output += output_overlay
-
-    return output
-
-
-def solve_445eab21(x):
-    """ the required transformation for the task number 846bdb03 is as follows:
-        1- find the rectangles in the grid / image and calculate the area of each
-        2- the color os the output is the same as the rectangle with the largest area
-        3- the output grid / image is always 2x2
-
-        For this task all the test and training grids are solved correctly
-    """
-    # Initially our maximum area is 0 and the output color is black
-    max_area = 0
-    output_color = 0
-    # First we will get the colored pixels in the image
-    colored_pixels = get_colored_pixels(x)
-    # Then we will get the objects list of the objects contained in the image
-    object_list = get_object_list(x, colored_pixels)
-    # for each object we will get the width and height
-    for curr_object in object_list:
-        # since we now that each object is a rectangle then by finding the
-        # object boundaries we can calculate it's width and height
-        i_max, i_min, j_max, j_min = get_boundary(curr_object)
-        width = (j_max - j_min) + 1
-        height = (i_max - i_min) + 1
-        # check if the area of this object is bigger than our current max area
-        if width * height > max_area:
-            # This is our new max area
-            max_area = width * height
-            # We will use th color of this object
-            output_color = curr_object[0]['color']
-    # Create the output image with the selected color
-    output = np.ones((2, 2)) * output_color
 
     return output
 
@@ -180,13 +147,77 @@ def solve_3befdf3e(x):
         add_boundary(output, (i_min, i_max, j_min, j_max), boundary_thickness, major_color)
     return output
 
+
+def solve_67385a82(x):
+    """ the required transformation for the task number 846bdb03 is as follows:
+            1- The objects in the image
+            2- for all the objects that are have more than one pixel color them blue
+            3- the output should be the same as the input except with the objects
+            bigger than 1 pixel colored in blue
+
+            For this task all the test and training grids are solved correctly
+        """
+    # First we will just copy the th input to the output to start from there
+    output = np.copy(x)
+    # second we will get the colored pixels in the image
+    colored_pixels = get_colored_pixels(x)
+    # Then we will get the objects list of the objects contained in the image
+    object_list = get_object_list(x, colored_pixels)
+    # now we will create a list of objects that have more than one pixel
+    large_objects = [curr_object for curr_object in object_list if len(curr_object) > 1]
+    # Now we will color the object as blue
+    blue = 8
+    [color_object(obj, blue) for obj in large_objects]
+    # Now we will draw the large objects with the new color
+    [draw_objects(output, obj) for obj in large_objects]
+
+    return output
+
+
+def solve_445eab21(x):
+    """ the required transformation for the task number 846bdb03 is as follows:
+        1- find the rectangles in the grid / image and calculate the area of each
+        2- the color os the output is the same as the rectangle with the largest area
+        3- the output grid / image is always 2x2
+
+        For this task all the test and training grids are solved correctly
+    """
+    # Initially our maximum area is 0 and the output color is black
+    max_area = 0
+    output_color = 0
+    # First we will get the colored pixels in the image
+    colored_pixels = get_colored_pixels(x)
+    # Then we will get the objects list of the objects contained in the image
+    object_list = get_object_list(x, colored_pixels)
+    # for each object we will get the width and height
+    for curr_object in object_list:
+        # since we now that each object is a rectangle then by finding the
+        # object boundaries we can calculate it's width and height
+        i_max, i_min, j_max, j_min = get_boundary(curr_object)
+        width = (j_max - j_min) + 1
+        height = (i_max - i_min) + 1
+        # check if the area of this object is bigger than our current max area
+        if width * height > max_area:
+            # This is our new max area
+            max_area = width * height
+            # We will use th color of this object
+            output_color = curr_object[0]['color']
+    # Create the output image with the selected color
+    output = np.ones((2, 2)) * output_color
+
+    return output
+
 ## Following are the helper functions used in the above tasks solvers
 
 
-def draw_objects(image, object_list):
-    for curr_object in object_list:
-        for pixel in curr_object:
-            image[pixel['j']][pixel['i']] = pixel['color']
+def color_object(curr_object, color):
+    for pixel in curr_object:
+        pixel['color'] = color
+
+
+def draw_objects(image, curr_object):
+    for pixel in curr_object:
+        image[pixel['j']][pixel['i']] = pixel['color']
 
 
 def offset_objects(object_list, i_offset, j_offset):
@@ -246,10 +277,9 @@ def get_object_list(image, colored_pixels):
 def subtract_object(curr_object, colored_pixel):
     updated_colored_pixel = []
     for pixel in colored_pixel:
-        try:
-            curr_object.index(pixel)
-        except:
+        if pixel not in curr_object:
             updated_colored_pixel.append(pixel)
+
     colored_pixel = updated_colored_pixel
     return colored_pixel
 
@@ -278,37 +308,46 @@ def get_continuous_object(image, top_left_pixel):
     # Get the unique values of the returned list
     unique_object_pixels = []
     for pixel in object_pixels:
-        try:
-            unique_object_pixels.index(pixel)
-        except:
+        if pixel not in unique_object_pixels:
             unique_object_pixels.append(pixel)
+
     return unique_object_pixels
 
 
 def get_neighbour_pixels(output_pixel, image, curr_pixel):
-    """ This function has a limitation that it can only work if the
-    given pixel to start with is the top left most pixel because the function
-    explore only in the left and down directions, to extend it to explore in the
-    four directions we need to keep track of which pixels have been already explores
-    to avoid getting to the same pixel and exploring its neighbours multiple times"""
 
-    # First we will add our curr pixel to the output pixel list
-    output_pixel.append(curr_pixel)
-    # for the current pixel we will check the 4 neighbours
-    i = curr_pixel['i']
-    j = curr_pixel['j']
+    # first we need to check if we have already checked this pixel
+    # to avoid re-checking a pixel that we have already explored
+    if curr_pixel not in output_pixel:
+        # then we will add our curr pixel to the output pixel list
+        output_pixel.append(curr_pixel)
+        # for the current pixel we will check the 4 neighbours
+        i = curr_pixel['i']
+        j = curr_pixel['j']
 
-    # check the lower pixel
-    if j < image.shape[0] - 1:
-        if image[j + 1][i] != 0:
-            # call get neighbours for this pixel
-            get_neighbour_pixels(output_pixel, image, {'color': image[j + 1][i], 'i': i, 'j': j+1})
+        # check the lower pixel
+        if j < image.shape[0] - 1:
+            if image[j + 1][i] != 0:
+                # call get neighbours for this pixel
+                get_neighbour_pixels(output_pixel, image, {'color': image[j + 1][i], 'i': i, 'j': j+1})
 
-    # check the right pixel
-    if i < image.shape[1] - 1:
-        if image[j][i + 1] != 0:
-            # call get neighbours for this pixel
-            get_neighbour_pixels(output_pixel, image, {'color': image[j][i + 1], 'i': i + 1, 'j': j})
+        # check the upper pixel
+        if j > 0:
+            if image[j - 1][i] != 0:
+                # call get neighbours for this pixel
+                get_neighbour_pixels(output_pixel, image, {'color': image[j - 1][i], 'i': i, 'j': j - 1})
+
+        # check the right pixel
+        if i < image.shape[1] - 1:
+            if image[j][i + 1] != 0:
+                # call get neighbours for this pixel
+                get_neighbour_pixels(output_pixel, image, {'color': image[j][i + 1], 'i': i + 1, 'j': j})
+
+        # check the left pixel
+        if i > 0:
+            if image[j][i - 1] != 0:
+                # call get neighbours for this pixel
+                get_neighbour_pixels(output_pixel, image, {'color': image[j][i - 1], 'i': i - 1, 'j': j})
 
     # if no colored pixel was found on the neighbours we will return
     return
