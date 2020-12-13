@@ -31,6 +31,11 @@ A "grid" is a rectangular matrix (list of lists) of integers between 0 and 9 (in
 When looking at a task, a test-taker has access to inputs & outputs of the demonstration pairs, plus the input(s) of the test pair(s). The goal is to construct the output grid(s) corresponding to the test input grid(s), using 3 trials for each test input. "Constructing the output grid" involves picking the height and width of the output grid, then filling each cell in the grid with a symbol (integer between 0 and 9, which are visualized as colors). Only *exact* solutions (all cells match the expected answer) can be said to be correct.
 
 
+## Repo purpose
+the purpose of this repository (https://github.com/maryraymond/ARC.git) is to demonstrate a manual way of solving 3 of the ARC tasks, this demonstration could be found in the file "manual_solve.py".
+For each task a solve function is provided with the naming convension solve_ID where ID is the ID of the task, this demonstration is part of an assigment in the programning and tools module CT5148 which is part of the online masters in AI in NUI galway.
+
+
 ## Usage of the testing interface
 
 The testing interface is located at `apps/testing_interface.html`. Open it in a web browser (Chrome recommended). It will prompt you to select a task JSON file.
