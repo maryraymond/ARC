@@ -32,7 +32,7 @@ When looking at a task, a test-taker has access to inputs & outputs of the demon
 
 
 ## Repo purpose
-the purpose of this repository (https://github.com/maryraymond/ARC.git) is to demonstrate a manual way of solving 3 of the ARC tasks, this demonstration could be found in the file "manual_solve.py".
+the purpose of this repository (https://github.com/maryraymond/ARC.git) is to demonstrate a manual way of solving a number of the ARC tasks, this demonstration could be found in the file "manual_solve.py".
 For each task a solve function is provided with the naming convension solve_ID where ID is the ID of the task, this demonstration is part of an assigment in the programning and tools module CT5148 which is part of the online masters in AI in NUI galway.
 
 
